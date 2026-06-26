@@ -1,6 +1,7 @@
-"""CLI: inventory quantum-vulnerable cryptography and score HNDL risk.
+"""CLI: inventory quantum-vulnerable cryptography, score HNDL, enforce a crypto policy.
 
-    python -m crypto_inventory scan <paths...> [--format text|cyclonedx] [--fail-on high|any|none]
+    python -m crypto_inventory scan <paths...> [--format text|cyclonedx|sarif]
+                                               [--fail-on high|any|none] [--policy policy.json]
 """
 
 from __future__ import annotations
@@ -9,6 +10,7 @@ import argparse
 import sys
 
 from . import cbom, sarif
+from . import policy as policy_mod
 from .scan import scan, summarize
 
 _MARK = {"HIGH": "[HIGH]", "MEDIUM": "[MED ]"}
@@ -22,20 +24,28 @@ def _exit_code(fail_on: str, findings) -> int:
     return 1 if any(f.rule.severity == "HIGH" for f in findings) else 0  # default: HIGH
 
 
+def _resolve_exit(args, findings, policy_viol) -> int:
+    # A declared policy overrides --fail-on: FAIL iff a forbidden algorithm is present.
+    if policy_viol is not None:
+        return 1 if policy_viol else 0
+    return _exit_code(args.fail_on, findings)
+
+
 def cmd_scan(args) -> int:
     findings = scan(args.paths)
+    forbidden = policy_mod.load_forbidden(args.policy) if args.policy else None
+    policy_viol = policy_mod.violations(findings, forbidden) if forbidden is not None else None
 
     if args.format == "cyclonedx":
         print(cbom.dumps(findings))
-        return _exit_code(args.fail_on, findings)
-
+        return _resolve_exit(args, findings, policy_viol)
     if args.format == "sarif":
         print(sarif.dumps(findings))
-        return _exit_code(args.fail_on, findings)
+        return _resolve_exit(args, findings, policy_viol)
 
     if not findings:
         print(f"OK — no quantum-vulnerable cryptography found under {', '.join(args.paths)}")
-        return 0
+        return _resolve_exit(args, findings, policy_viol)
 
     print(f"QUANTUM-VULNERABLE CRYPTOGRAPHY ({len(findings)} findings)\n")
     for f in sorted(findings, key=lambda x: (x.rule.severity != "HIGH", x.file, x.lineno)):
@@ -48,7 +58,15 @@ def cmd_scan(args) -> int:
     print("-" * 60)
     print(f"  algorithms: {', '.join(s['algorithms'])}")
     print(f"  HIGH (Shor-broken): {s['high']}   HNDL-urgent (confidentiality): {s['hndl']}")
-    return _exit_code(args.fail_on, findings)
+
+    if policy_viol is not None:
+        if policy_viol:
+            bad = ", ".join(sorted({f.rule.algo for f in policy_viol}))
+            print(f"  POLICY: FORBIDDEN algorithms present: {bad}  ->  FAIL")
+        else:
+            print("  POLICY: no forbidden algorithms present  ->  PASS")
+
+    return _resolve_exit(args, findings, policy_viol)
 
 
 def build_parser() -> argparse.ArgumentParser:
@@ -58,6 +76,7 @@ def build_parser() -> argparse.ArgumentParser:
     sc.add_argument("paths", nargs="*", default=["."])
     sc.add_argument("--format", choices=["text", "cyclonedx", "sarif"], default="text")
     sc.add_argument("--fail-on", choices=["high", "any", "none"], default="high")
+    sc.add_argument("--policy", help='JSON crypto policy, e.g. {"forbidden": ["RSA","ECDSA"]}')
     sc.set_defaults(func=cmd_scan)
     return p
 

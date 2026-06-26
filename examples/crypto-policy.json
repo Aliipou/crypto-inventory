@@ -1,0 +1,4 @@
+{
+  "_comment": "Organizational crypto policy. List the algorithms that are FORBIDDEN now. A scan fails if any are present — your migration phase, in one file. Add to 'forbidden' as you deprecate each algorithm; the tool owns no secrets, it only decides.",
+  "forbidden": ["RSA"]
+}
