@@ -60,7 +60,10 @@ def scan_file(path: Path) -> list[Finding]:
 
 
 def scan(paths) -> list[Finding]:
-    from .manifests import is_manifest, scan_manifest  # lazy: avoid import cycle
+    # Lazy imports: avoid import cycles (these frontends import Finding from here).
+    from .manifests import is_manifest, scan_manifest
+    from .rust_frontend import is_rust_source, scan_rust_file
+    from .certs import is_cert_or_config, scan_cert_or_config
 
     out: list[Finding] = []
     for root in paths:
@@ -68,12 +71,21 @@ def scan(paths) -> list[Finding]:
         if p.is_file():
             files = [p]
         else:
-            files = sorted(set(p.rglob("*.py")) | {f for f in p.rglob("*") if f.is_file() and is_manifest(f)})
+            files = sorted(
+                set(p.rglob("*.py"))
+                | {f for f in p.rglob("*") if f.is_file() and is_rust_source(f)}
+                | {f for f in p.rglob("*") if f.is_file() and is_manifest(f)}
+                | {f for f in p.rglob("*") if f.is_file() and is_cert_or_config(f)}
+            )
         for f in files:
             if f.suffix == ".py":
                 out.extend(scan_file(f))
+            elif is_rust_source(f):
+                out.extend(scan_rust_file(f))
             elif is_manifest(f):
                 out.extend(scan_manifest(f))
+            elif is_cert_or_config(f):
+                out.extend(scan_cert_or_config(f))
     return out
 
 

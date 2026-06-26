@@ -1,0 +1,11 @@
+# Sample OpenSSL config naming a quantum-vulnerable key type (for the scanner).
+[ req ]
+default_bits        = 2048
+default_md          = sha256
+distinguished_name  = req_distinguished_name
+
+[ req_distinguished_name ]
+# An RSA key is requested here -> HIGH, HNDL
+# (an ECDSA alternative with prime256v1 would also flag)
+encrypt_key         = no
+default_keytype     = rsa

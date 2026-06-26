@@ -25,6 +25,8 @@ _PRIMITIVE = {
     "Ed25519": "signature",
     "Ed448": "signature",
     "AES-128": "block-cipher",
+    "RSA/ECDSA/Ed25519": "signature",       # ring's aggregate signature module
+    "Certificate/Key (unverified)": "unknown",  # coarse file-presence signal
 }
 
 

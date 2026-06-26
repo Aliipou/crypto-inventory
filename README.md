@@ -33,6 +33,28 @@ drops into CI as a "no new quantum-vulnerable crypto" gate.
         -> migrate to ML-KEM (FIPS 203) for key exchange; ML-DSA (FIPS 204) for signatures
 ```
 
+## Frontends (what it scans)
+
+Beyond Python source it now has additional *frontends*, each a coarser signal that
+the AST scanner cannot give, all flowing into the same Rule/Finding model and every
+output format (text / CycloneDX CBOM / SARIF) and the `--policy` gate:
+
+- **Python AST** — imports of Shor-broken primitives (the precise core).
+- **Dependency manifests** — `requirements*.txt`, `pyproject.toml`, etc. naming a
+  vulnerable package (`rsa`, `ecdsa`, `pynacl`, `pycryptodome`).
+- **Rust source (`.rs`)** — regex/`use`-statement matching for the common
+  quantum-vulnerable crates: `ed25519-dalek`, `x25519-dalek`, `rsa`, `ecdsa`,
+  `p256`/`p384`/`k256`, `dsa`, `elliptic-curve`, and `ring`'s `signature` module.
+  This closes a real gap: the Python scanner could not see Rust crypto such as
+  AuthGate's own Ed25519. It is *not* a Rust parser — it keys off crate/`use`
+  paths, not bare words, so "rsa" in a comment or string is not flagged.
+- **Certificates / TLS config** — a deliberately **coarse** transport signal:
+  a `*.pem`/`*.crt`/`*.cer`/`*.key` file is flagged `MEDIUM` as "certificate or key
+  present — verify the key algorithm" (we do not parse the DER, so the algorithm is
+  unverified); a config file (`*.conf`/`*.cnf`/`openssl.cnf`/`*.yaml`/`*.yml`/`*.ini`/
+  `*.toml`) that *names* an RSA/ECDSA/EC/DSA key type is flagged `HIGH` for that
+  algorithm. Low-resolution by design — a "look here" pointer, not proof.
+
 ## Scope (deliberately narrow)
 
 This is the **discovery / inventory** wedge — *not* a migration engine, key-rotation

@@ -1,0 +1,6 @@
+-----BEGIN CERTIFICATE-----
+SAMPLE NON-FUNCTIONAL PLACEHOLDER CERTIFICATE — not a real key.
+This file exists only so the cert frontend can demonstrate flagging the
+*presence* of a certificate file (algorithm unverified). It contains no
+secret key material.
+-----END CERTIFICATE-----
