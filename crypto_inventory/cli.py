@@ -8,7 +8,7 @@ from __future__ import annotations
 import argparse
 import sys
 
-from . import cbom
+from . import cbom, sarif
 from .scan import scan, summarize
 
 _MARK = {"HIGH": "[HIGH]", "MEDIUM": "[MED ]"}
@@ -27,6 +27,10 @@ def cmd_scan(args) -> int:
 
     if args.format == "cyclonedx":
         print(cbom.dumps(findings))
+        return _exit_code(args.fail_on, findings)
+
+    if args.format == "sarif":
+        print(sarif.dumps(findings))
         return _exit_code(args.fail_on, findings)
 
     if not findings:
@@ -52,7 +56,7 @@ def build_parser() -> argparse.ArgumentParser:
     sub = p.add_subparsers(dest="cmd", required=True)
     sc = sub.add_parser("scan", help="scan paths for quantum-vulnerable crypto")
     sc.add_argument("paths", nargs="*", default=["."])
-    sc.add_argument("--format", choices=["text", "cyclonedx"], default="text")
+    sc.add_argument("--format", choices=["text", "cyclonedx", "sarif"], default="text")
     sc.add_argument("--fail-on", choices=["high", "any", "none"], default="high")
     sc.set_defaults(func=cmd_scan)
     return p

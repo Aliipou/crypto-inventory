@@ -60,12 +60,20 @@ def scan_file(path: Path) -> list[Finding]:
 
 
 def scan(paths) -> list[Finding]:
+    from .manifests import is_manifest, scan_manifest  # lazy: avoid import cycle
+
     out: list[Finding] = []
     for root in paths:
         p = Path(root)
-        files = [p] if p.is_file() else sorted(p.rglob("*.py"))
-        for py in files:
-            out.extend(scan_file(py))
+        if p.is_file():
+            files = [p]
+        else:
+            files = sorted(set(p.rglob("*.py")) | {f for f in p.rglob("*") if f.is_file() and is_manifest(f)})
+        for f in files:
+            if f.suffix == ".py":
+                out.extend(scan_file(f))
+            elif is_manifest(f):
+                out.extend(scan_manifest(f))
     return out
 
 
