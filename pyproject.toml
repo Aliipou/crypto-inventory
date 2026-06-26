@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "crypto-inventory"
+version = "0.1.0"
+description = "Static scanner for quantum-vulnerable cryptography (RSA/ECC/DH) and Harvest-Now-Decrypt-Later risk."
+readme = "README.md"
+requires-python = ">=3.10"
+license = { text = "MIT" }
+authors = [{ name = "Ali Pourrahim" }]
+keywords = ["post-quantum", "pqc", "cryptography", "hndl", "migration", "scanner"]
+dependencies = []
+
+[project.scripts]
+crypto-inventory = "crypto_inventory.cli:main"
+
+[tool.setuptools]
+packages = ["crypto_inventory"]

@@ -1,0 +1,23 @@
+name: ci
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.10", "3.11", "3.12", "3.13"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+      - run: python -m unittest discover -s tests -t .
+      - name: self-demo (must flag the vulnerable example)
+        run: |
+          if python -m crypto_inventory scan examples/vulnerable_app.py; then
+            echo "expected HIGH findings, got none"; exit 1
+          else
+            echo "vulnerable crypto correctly flagged"
+          fi
