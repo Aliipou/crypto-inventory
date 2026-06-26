@@ -51,7 +51,12 @@ All independent; none imports another.
 
 ```bash
 python -m crypto_inventory scan examples/
+python -m crypto_inventory scan examples/ --format cyclonedx   # CycloneDX CBOM (machine-readable, for audits/tooling)
 python -m unittest discover -s tests -t .
 ```
+
+It can emit a **CycloneDX 1.6 CBOM** (Cryptographic Bill of Materials) — the format
+enterprises and regulators consume — with each finding as a `cryptographic-asset`
+carrying its HNDL flag and PQC replacement. Pragmatic shape, not full-spec conformance.
 
 See `THREAT_MODEL.md` for what it can and cannot detect.
