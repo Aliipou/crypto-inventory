@@ -34,6 +34,7 @@ def to_sarif(findings: list[Finding], tool_version: str = "0.1.0") -> dict:
             "ruleId": rule_id,
             "level": _LEVEL.get(f.rule.severity, "warning"),
             "message": {"text": msg},
+            "properties": {"confidence": f.rule.confidence},
             "locations": [{
                 "physicalLocation": {
                     "artifactLocation": {"uri": PurePath(f.file).as_posix()},

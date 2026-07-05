@@ -29,7 +29,9 @@ class Finding:
 
 
 def _looks_like_crypto(module: str | None) -> bool:
-    return bool(module) and any(h in module.lower() for h in CRYPTO_MODULE_HINTS)
+    if not module:
+        return False
+    return any(h in module.lower() for h in CRYPTO_MODULE_HINTS)
 
 
 def scan_file(path: Path) -> list[Finding]:
@@ -61,9 +63,9 @@ def scan_file(path: Path) -> list[Finding]:
 
 def scan(paths) -> list[Finding]:
     # Lazy imports: avoid import cycles (these frontends import Finding from here).
+    from .certs import is_cert_or_config, scan_cert_or_config
     from .manifests import is_manifest, scan_manifest
     from .rust_frontend import is_rust_source, scan_rust_file
-    from .certs import is_cert_or_config, scan_cert_or_config
 
     out: list[Finding] = []
     for root in paths:

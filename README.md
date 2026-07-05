@@ -43,11 +43,17 @@ output format (text / CycloneDX CBOM / SARIF) and the `--policy` gate:
 - **Dependency manifests** — `requirements*.txt`, `pyproject.toml`, etc. naming a
   vulnerable package (`rsa`, `ecdsa`, `pynacl`, `pycryptodome`).
 - **Rust source (`.rs`)** — regex/`use`-statement matching for the common
-  quantum-vulnerable crates: `ed25519-dalek`, `x25519-dalek`, `rsa`, `ecdsa`,
-  `p256`/`p384`/`k256`, `dsa`, `elliptic-curve`, and `ring`'s `signature` module.
-  This closes a real gap: the Python scanner could not see Rust crypto such as
-  AuthGate's own Ed25519. It is *not* a Rust parser — it keys off crate/`use`
-  paths, not bare words, so "rsa" in a comment or string is not flagged.
+  quantum-vulnerable crates: `ed25519`/`ed25519-dalek`/`ed25519-compact`,
+  `x25519-dalek`, `curve25519-dalek`, `rsa`, `ecdsa`, `p256`/`p384`/`k256`,
+  `secp256k1`, `dsa`, `elliptic-curve`, `openssl` (RSA/EC/DSA submodules), and
+  `ring`'s `signature`/`agreement` modules. Post-quantum crates (`pqcrypto`,
+  `ml-kem`, `ml-dsa`, …) are the migration goal and are never flagged. Each
+  finding carries a `confidence` (`high` for a direct crate path, `low` for a
+  vulnerable crate imported under an `as` alias, whose downstream call sites are
+  invisible to regex). This closes a real gap: the Python scanner could not see
+  Rust crypto such as AuthGate's own Ed25519. It is *not* a Rust parser — it keys
+  off crate/`use` paths, not bare words, so "rsa" in a comment or string is not
+  flagged.
 - **Certificates / TLS config** — a deliberately **coarse** transport signal:
   a `*.pem`/`*.crt`/`*.cer`/`*.key` file is flagged `MEDIUM` as "certificate or key
   present — verify the key algorithm" (we do not parse the DER, so the algorithm is

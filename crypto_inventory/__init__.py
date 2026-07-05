@@ -5,9 +5,9 @@ Python source, classifies Harvest-Now-Decrypt-Later risk, and names the NIST PQC
 replacement. Dev/CI tool; independent of any other system. Stdlib only.
 """
 
+from .cbom import to_cyclonedx
 from .rules import Rule
 from .scan import Finding, scan, scan_file, summarize
-from .cbom import to_cyclonedx
 
 __version__ = "0.1.0"
 

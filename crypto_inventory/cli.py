@@ -50,7 +50,8 @@ def cmd_scan(args) -> int:
     print(f"QUANTUM-VULNERABLE CRYPTOGRAPHY ({len(findings)} findings)\n")
     for f in sorted(findings, key=lambda x: (x.rule.severity != "HIGH", x.file, x.lineno)):
         hndl = "  HNDL: harvest-now-decrypt-later" if f.rule.hndl else ""
-        print(f"  {_MARK[f.rule.severity]} {f.file}:{f.lineno}  {f.name} ({f.rule.algo}){hndl}")
+        conf = f"  confidence={f.rule.confidence}"
+        print(f"  {_MARK[f.rule.severity]} {f.file}:{f.lineno}  {f.name} ({f.rule.algo}){conf}{hndl}")
         print(f"          {f.rule.why}")
         print(f"          -> migrate to {f.rule.replacement}\n")
 

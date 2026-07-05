@@ -4,10 +4,10 @@ import textwrap
 import unittest
 from pathlib import Path
 
-from crypto_inventory import scan
+from crypto_inventory import scan, scan_file
 from crypto_inventory.manifests import is_manifest, scan_manifest
-from crypto_inventory.sarif import dumps as sarif_dumps, to_sarif
-from crypto_inventory import scan_file
+from crypto_inventory.sarif import dumps as sarif_dumps
+from crypto_inventory.sarif import to_sarif
 
 ROOT = Path(__file__).resolve().parents[1]
 EXAMPLES = ROOT / "examples"

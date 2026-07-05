@@ -22,6 +22,12 @@ class Rule:
     hndl: bool          # confidentiality at retroactive risk
     why: str
     replacement: str    # NIST PQC standard
+    # How sure the *match* is (NOT how severe). "high" = a direct, named crypto
+    # crate/module path. "low" = a heuristic match, e.g. a vulnerable path reached
+    # under a `use ... as Alias`, where the evidence is the import line alone.
+    # Defaults to "high" so every existing positional Rule(...) construction (and
+    # the existing test suite) keeps working unchanged.
+    confidence: str = "high"
 
 
 _KEX = "ML-KEM (FIPS 203)"

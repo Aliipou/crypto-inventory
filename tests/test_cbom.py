@@ -1,11 +1,11 @@
 import json
+import tempfile
+import textwrap
 import unittest
+from pathlib import Path
 
 from crypto_inventory import scan_file, to_cyclonedx
 from crypto_inventory.cbom import dumps
-from pathlib import Path
-import tempfile
-import textwrap
 
 
 def _findings(src):
@@ -37,6 +37,11 @@ class TestCBOM(unittest.TestCase):
     def test_empty_findings_empty_components(self):
         bom = to_cyclonedx([])
         self.assertEqual(bom["components"], [])
+
+    def test_carries_confidence_property(self):
+        bom = to_cyclonedx(_findings("from cryptography.hazmat.primitives.asymmetric import rsa\n"))
+        props = {p["name"]: p["value"] for p in bom["components"][0]["properties"]}
+        self.assertIn(props["crypto-inventory:confidence"], ("high", "low"))
 
 
 if __name__ == "__main__":

@@ -25,7 +25,10 @@ _PRIMITIVE = {
     "Ed25519": "signature",
     "Ed448": "signature",
     "AES-128": "block-cipher",
+    "Curve25519": "key-agree",
     "RSA/ECDSA/Ed25519": "signature",       # ring's aggregate signature module
+    "X25519/ECDH": "key-agree",             # ring's agreement module
+    "RSA/ECC/DSA": "pke",                    # openssl crate aggregate
     "Certificate/Key (unverified)": "unknown",  # coarse file-presence signal
 }
 
@@ -48,6 +51,7 @@ def to_cyclonedx(findings: list[Finding], tool_version: str = "0.1.0") -> dict:
                 {"name": "crypto-inventory:quantum-vulnerable", "value": "true"},
                 {"name": "crypto-inventory:severity", "value": f.rule.severity},
                 {"name": "crypto-inventory:hndl", "value": str(f.rule.hndl).lower()},
+                {"name": "crypto-inventory:confidence", "value": f.rule.confidence},
                 {"name": "crypto-inventory:reason", "value": f.rule.why},
                 {"name": "crypto-inventory:replacement", "value": f.rule.replacement},
             ],
