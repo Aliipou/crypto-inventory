@@ -1,5 +1,7 @@
 # crypto-inventory
 
+**Live (graph):** [https://ali-crypto-inventory.vercel.app](https://ali-crypto-inventory.vercel.app)
+
 A static scanner that **inventories quantum-vulnerable cryptography** in Python
 source and scores **Harvest-Now-Decrypt-Later (HNDL)** risk — the first concrete
 step of a post-quantum migration: *you can't migrate what you can't find.*
